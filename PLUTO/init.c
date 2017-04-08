@@ -44,7 +44,7 @@ void Init (double *v, double x1, double x2, double x3)
   v[RHO] = 1.0;
   v[VX1] = 0.0;
   v[VX2] = 0.0;
-  v[VX3] = (x1 - g_domBeg[IDIR])/(g_domEnd[IDIR] - g_domBeg[IDIR]) + 1.0;
+  v[VX3] = ((x1 - g_domBeg[IDIR])/(g_domEnd[IDIR] - g_domBeg[IDIR]) + 1.0)*0.25;
   #if HAVE_ENERGY
    v[PRS] = 1.0;
   #endif
@@ -129,26 +129,23 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   }
 
   if (side == X1_BEG){  /* -- X1_BEG boundary -- */
-    if (box->vpos == CENTER) {
-      BOX_LOOP(box,k,j,i){  }
-    }else if (box->vpos == X1FACE){
-      BOX_LOOP(box,k,j,i){  }
-    }else if (box->vpos == X2FACE){
-      BOX_LOOP(box,k,j,i){  }
-    }else if (box->vpos == X3FACE){
-      BOX_LOOP(box,k,j,i){  }
+    BOX_LOOP(box,k,j,i){
+      d->Vc[RHO][k][j][i] =  d->Vc[RHO][k][j][2*IBEG - i - 1];
+      d->Vc[VX1][k][j][i] = -d->Vc[VX1][k][j][2*IBEG - i - 1];
+      d->Vc[VX2][k][j][i] =  d->Vc[VX2][k][j][2*IBEG - i - 1];
+      d->Vc[VX3][k][j][i] =  d->Vc[VX3][k][j][2*IBEG - i - 1];
+      d->Vc[PRS][k][j][i] =  d->Vc[PRS][k][j][2*IBEG - i - 1];
     }
   }
 
-  if (side == X1_END){  /* -- X1_END boundary -- */
-    if (box->vpos == CENTER) {
-      BOX_LOOP(box,k,j,i){  }
-    }else if (box->vpos == X1FACE){
-      BOX_LOOP(box,k,j,i){  }
-    }else if (box->vpos == X2FACE){
-      BOX_LOOP(box,k,j,i){  }
-    }else if (box->vpos == X3FACE){
-      BOX_LOOP(box,k,j,i){  }
+  if (side == X1_END){      /* -- X1_END boundary -- */
+    BOX_LOOP(box,k,j,i){    /* -- Reflective, except pressure -- */
+      d->Vc[RHO][k][j][i] =  d->Vc[RHO][k][j][2*IEND - i + 1];
+      d->Vc[VX1][k][j][i] = -d->Vc[VX1][k][j][2*IEND - i + 1];
+      d->Vc[VX2][k][j][i] =  d->Vc[VX2][k][j][2*IEND - i + 1];
+      d->Vc[VX3][k][j][i] =  d->Vc[VX3][k][j][2*IEND - i + 1];
+      d->Vc[PRS][k][j][i] =  d->Vc[PRS][k][j][2*IEND - i + 1];
+      /* d->Vc[PRS][k][j][i] = 1.0; /* Surface pressure is fixed */
     }
   }
 
@@ -217,7 +214,7 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
  *
  *********************************************************************** */
 {
-  g[IDIR] = -1.0;
+  g[IDIR] = -(g_domEnd[IDIR]*g_domEnd[IDIR])/(x1*x1);
   g[JDIR] =  0.0;
   g[KDIR] =  0.0;
 }
