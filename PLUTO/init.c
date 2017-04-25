@@ -44,7 +44,7 @@ void Init (double *v, double x1, double x2, double x3)
   v[RHO] = 1.0;
   v[VX1] = 0.0;
   v[VX2] = 0.0;
-  v[VX3] = ((x1 - g_domBeg[IDIR])/(g_domEnd[IDIR] - g_domBeg[IDIR]) + 1.0)*0.25;
+  v[VX3] = 0.0;
   #if HAVE_ENERGY
    v[PRS] = 1.0;
   #endif
@@ -214,7 +214,7 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
  *
  *********************************************************************** */
 {
-  g[IDIR] = -(g_domEnd[IDIR]*g_domEnd[IDIR])/(x1*x1);
+  g[IDIR] = -1.0/(x1*x1);
   g[JDIR] =  0.0;
   g[KDIR] =  0.0;
 }
