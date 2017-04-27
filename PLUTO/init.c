@@ -42,12 +42,18 @@ void Init (double *v, double x1, double x2, double x3)
  *********************************************************************** */
 {
   v[RHO] = 1.0;
+  /* In the isothermal case */
+  /* v[RHO] = (1.0e6)*exp(g_inputParam[PLANET_RADIUS]*g_inputParam[SURFACE_GRAVITY]/g_inputParam[SOUND_SPEED] * (g_inputParam[PLANET_RADIUS]/x1- 1.0))
   /* The fluid should be quiesecent when in equilibrium */
   v[VX1] = 0.0;
   v[VX2] = 0.0;
   v[VX3] = 0.0;
   #if HAVE_ENERGY
    v[PRS] = 1.0;
+   /* In the isothermal case */
+   /* v[PRS] = g_inputParam[SOUND_SPEED]*g_inputParam[SOUND_SPEED]*v[RHO] */
+   /* In the adiabatic case */
+   /* v[PRS] = power(1.0,g_gamma) */
   #endif
   v[TRC] = 0.0;
 
@@ -215,7 +221,8 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
  *
  *********************************************************************** */
 {
-  g[IDIR] = -1.0/(x1*x1);
+  /* Only includes the planetary gravity, without self gravity, for now */
+  g[IDIR] = -g_inputParam[SURFACE_GRAVITY]*g_inputParam[PLANET_RADIUS]*g_inputParam[PLANET_RADIUS]/(x1*x1);
   g[JDIR] =  0.0;
   g[KDIR] =  0.0;
 }
